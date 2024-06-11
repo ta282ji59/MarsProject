@@ -1,0 +1,100 @@
+services:
+  # ### Reverseproxy server ###
+  # nginx:
+  #   image: redace1/nginx:5.0
+  #   container_name: redace1_nginx
+  #   ports:
+  #     - "88:80"
+  #   volumes:
+  #     - ./nginx/conf:/etc/nginx/conf.d
+  #     - ./nginx/uwsgi_params:/etc/nginx/uwsgi_params
+  #     - ./mars_gis_django/collect_static:/collect_static
+  #   depends_on:
+  #     - django
+
+  # ### Django ###
+  # django:
+  #   image: redace1/django:5.0
+  #   container_name: redace1_django
+  #   restart: always
+  #   working_dir: /code
+  #   volumes:
+  #     - ./mars_gis_django:/code
+  #     - ./mars_gis_django/mars_data:/mars_data
+  #     - ./jupyterhub/data:/data
+  #   environment:
+  #     - DJANGO_SETTINGS_MODULE=mars_gis_django.settings
+  #   depends_on:
+  #     - postgis
+  #     - mapserver
+  #     - terrainserver
+  #   expose:
+  #     - "8001"
+  #   privileged: true
+  #   command: sh /code/start.sh
+
+  # ### Mapserver ###
+  # mapserver:
+  #   image: redace1/mapserver:5.0
+  #   container_name: redace1_mapserver
+  #   volumes:
+  #     - ./mapserver:/maps
+  #   depends_on:
+  #     - postgis
+  #   expose:
+  #     - "80"
+
+  ### Terrainserver ###
+  # terrainserver:
+  #   build:
+  #     context: ./terrain/cesium-terrain-server/docker
+  #     dockerfile: Dockerfile
+  #   container_name: redace1_terrainserver
+  #   environment:
+  #     - SERVE_STATIC=0
+  #   volumes:
+  #     - ./terrain/tilesets/terrain:/data/tilesets/terrain
+  #   expose:
+  #     - "8000"
+
+  ### Postgis ###
+  postgis:
+    image: redace1/postgis:5.0
+    container_name: redace1_postgis
+    platform: linux/amd64  # linux/amd64プラットフォームのイメージをlinux/arm64アーキテクチャで実行。MacM1に合わせた。
+    environment:
+      POSTGRES_PASSWORD: anpanman
+      POSTGRES_USER: m5211164
+      POSTGRES_DB: mars
+    volumes:
+      - ./db/PostGIS_volume:/var/lib/postgresql/data
+    expose:
+      - "5432"
+
+  ### JupyterHub ###
+  # jupyterhub:
+  #   image: redace1/jupyterhub:5.0
+  #   container_name: redace1_jupyterhub
+  #   depends_on:
+  #     - postgis
+  #   ports:
+  #     - 8000:8000
+  #   environment:
+  #     - POSTGRES_HOST:postgis
+  #     - POSTGRES_PORT:5432
+  #     - POSTGRES_USER:m5211164
+  #     - POSTGRES_PASSWORD:anpanman
+  #     - DJANGO_SETTINGS_MODULE=mars_gis_django.settings
+  #   links: 
+  #     - postgis:postgis
+  #   volumes:
+  #     - ./mars_gis_django:/code
+  #     - ./jupyterhub/config:/srv/jupyterhub/config
+  #     - ./jupyterhub/hook-script:/srv/jupyterhub/hook-script
+  #     - ./jupyterhub/data:/data
+  #   command: jupyterhub --config /srv/jupyterhub/config/jupyterhub_config.py
+  #   tty: true
+
+networks:
+  default:
+    driver: bridge

@@ -1,0 +1,10 @@
+db
+jupyterhub
+mapserver
+mars_gis_django
+nginx
+terrain
+
+
+*.txt
+*.zip
