@@ -46,9 +46,7 @@ services:
 
   ### Terrainserver ###
   # terrainserver:
-  #   build:
-  #     context: ./terrain/cesium-terrain-server/docker
-  #     dockerfile: Dockerfile
+  #   image: redace1/terrainserver:5.0
   #   container_name: redace1_terrainserver
   #   environment:
   #     - SERVE_STATIC=0
